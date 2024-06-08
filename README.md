@@ -1,0 +1,2 @@
+# cli
+Pyrite Cloud CLI
