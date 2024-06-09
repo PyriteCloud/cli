@@ -4,16 +4,17 @@ use commands::{Cli, Commands};
 use utils::PyriteTheme;
 
 pub mod commands;
-pub mod templates;
+pub mod models;
 pub mod utils;
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     set_theme(PyriteTheme);
 
     let args = Cli::parse();
 
     match args.cmd {
-        Commands::Docker { docker_cmd } => docker_cmd.run()?,
+        Commands::Docker { docker_cmd } => docker_cmd.run().await?,
     }
 
     Ok(())
