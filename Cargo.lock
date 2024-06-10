@@ -885,7 +885,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pyrite_cli"
+name = "pyrite"
 version = "0.1.0"
 dependencies = [
  "clap",

@@ -3,6 +3,7 @@ use console::Style;
 
 pub(crate) const BASE_URL: &str = "https://pyritecloud.github.io/workflows";
 pub(crate) const ERR_MSG: &str = "There was an error, please try again";
+pub(crate) const DOCKER_FILE: &str = "Dockerfile";
 
 pub(crate) struct PyriteTheme;
 
