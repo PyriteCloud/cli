@@ -9,6 +9,7 @@ use handlebars::Handlebars;
 
 use crate::models::options::Meta;
 use crate::models::vars::{After, QuestionType, TemplateVars};
+use crate::utils::handlebars::is_equal_helper;
 use crate::utils::{BASE_URL, DOCKER_FILE, ERR_MSG};
 
 #[derive(Subcommand, Debug, Clone)]
@@ -87,7 +88,8 @@ impl DockerCommands {
         )
         .await?;
 
-        let handlebars = Handlebars::new();
+        let mut handlebars = Handlebars::new();
+        handlebars.register_helper("isEqual", Box::new(is_equal_helper));
         let out = handlebars.render_template(&tmpl, &vars)?;
 
         fs::write(DOCKER_FILE, out)?;
