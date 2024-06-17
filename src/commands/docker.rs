@@ -4,12 +4,13 @@ use std::fs;
 use std::future::Future;
 
 use clap::Subcommand;
-use cliclack::{spinner, Input, Select};
+use cliclack::{spinner, Confirm, Input, Select};
 use handlebars::Handlebars;
+use serde_json::Value;
 
 use crate::models::options::Meta;
 use crate::models::vars::{After, QuestionType, TemplateVars};
-use crate::utils::handlebars::is_equal_helper;
+use crate::utils::handlebars::setup_handlebars;
 use crate::utils::{BASE_URL, DOCKER_FILE, ERR_MSG};
 
 #[derive(Subcommand, Debug, Clone)]
@@ -73,7 +74,7 @@ impl DockerCommands {
     async fn process_choice(choice: String) -> Result<(), Box<dyn std::error::Error>> {
         let mut after = Some(After::new(choice));
         let mut path = None;
-        let mut vars: BTreeMap<String, String> = BTreeMap::new();
+        let mut vars: BTreeMap<String, Value> = BTreeMap::new();
 
         while after.is_some() {
             (after, path) = Self::ask_questions(&after.unwrap().goto, &mut vars).await?;
@@ -89,7 +90,8 @@ impl DockerCommands {
         .await?;
 
         let mut handlebars = Handlebars::new();
-        handlebars.register_helper("isEqual", Box::new(is_equal_helper));
+        setup_handlebars(&mut handlebars);
+
         let out = handlebars.render_template(&tmpl, &vars)?;
 
         fs::write(DOCKER_FILE, out)?;
@@ -99,7 +101,7 @@ impl DockerCommands {
 
     async fn ask_questions(
         path: &str,
-        answers: &mut BTreeMap<String, String>,
+        answers: &mut BTreeMap<String, Value>,
     ) -> Result<(Option<After>, Option<String>), Box<dyn std::error::Error>> {
         let t_vars = Self::with_progress(
             || Self::fetch_questions(path),
@@ -117,12 +119,12 @@ impl DockerCommands {
                         let default = default.to_owned();
                         ans_input = ans_input.default_input(&default).placeholder(&default);
                     }
-                    let ans = ans_input.required(true).interact();
+                    let ans = ans_input.required(true).interact::<String>();
 
                     if let Ok(choice) = ans {
-                        answers.insert(question.var_name, choice);
+                        answers.insert(question.var_name, choice.into());
                     } else if let Some(choice) = question.default {
-                        answers.insert(question.var_name, choice);
+                        answers.insert(question.var_name, choice.into());
                     } else {
                         return Err(ERR_MSG)?;
                     }
@@ -140,7 +142,15 @@ impl DockerCommands {
                         .interact();
 
                     if let Ok(choice) = ans {
-                        answers.insert(question.var_name, choice);
+                        answers.insert(question.var_name, choice.into());
+                    } else {
+                        return Err(ERR_MSG)?;
+                    }
+                }
+                QuestionType::Confirm => {
+                    let ans = Confirm::new(&question.message).interact();
+                    if let Ok(choice) = ans {
+                        answers.insert(question.var_name, choice.into());
                     } else {
                         return Err(ERR_MSG)?;
                     }

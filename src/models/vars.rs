@@ -24,6 +24,8 @@ pub(crate) enum QuestionType {
     Input,
     #[serde(rename = "select")]
     Select,
+    #[serde(rename = "confirm")]
+    Confirm,
 }
 
 #[derive(Deserialize, Clone)]
