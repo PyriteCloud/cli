@@ -1,17 +1,16 @@
 use std::collections::BTreeMap;
-use std::error::Error;
 use std::fs;
-use std::future::Future;
 
 use clap::Subcommand;
-use cliclack::{spinner, Confirm, Input, Select};
+use cliclack::{Confirm, Input, Select};
 use handlebars::Handlebars;
 use serde_json::Value;
 
 use crate::models::options::Meta;
 use crate::models::vars::{After, QuestionType, TemplateVars};
+use crate::services::UtilsService;
 use crate::utils::handlebars::setup_handlebars;
-use crate::utils::{BASE_URL, DOCKER_FILE, ERR_MSG};
+use crate::utils::{DOCKER_FILE, ERR_MSG, WORKFLOWS_BASE_URL};
 
 #[derive(Subcommand, Debug, Clone)]
 pub(crate) enum DockerCommands {
@@ -23,7 +22,7 @@ impl DockerCommands {
         match self {
             DockerCommands::Init => {
                 // If the template is not set, ask the user
-                let meta = Self::with_progress(
+                let meta = UtilsService::with_progress(
                     Self::fetch_metadata,
                     "Fetching metadata",
                     "Fetched metadata",
@@ -52,7 +51,7 @@ impl DockerCommands {
     }
 
     async fn fetch_metadata() -> Result<Meta, Box<dyn std::error::Error>> {
-        let meta = reqwest::get(format!("{BASE_URL}{}", "/templates/options.json"))
+        let meta = reqwest::get(format!("{WORKFLOWS_BASE_URL}{}", "/templates/options.json"))
             .await?
             .json::<Meta>()
             .await?;
@@ -61,7 +60,7 @@ impl DockerCommands {
     }
 
     async fn fetch_questions(path: &str) -> Result<TemplateVars, Box<dyn std::error::Error>> {
-        let path = format!("{BASE_URL}{path}{}", "/vars.json");
+        let path = format!("{WORKFLOWS_BASE_URL}{path}{}", "/vars.json");
         let t_vars = reqwest::get(path).await?.json::<TemplateVars>().await?;
         Ok(t_vars)
     }
@@ -81,7 +80,7 @@ impl DockerCommands {
         }
 
         let path = path.unwrap();
-        let tmpl = Self::with_progress(
+        let tmpl = UtilsService::with_progress(
             || Self::fetch_template(&path),
             "Generating template",
             "Template generated",
@@ -103,7 +102,7 @@ impl DockerCommands {
         path: &str,
         answers: &mut BTreeMap<String, Value>,
     ) -> Result<(Option<After>, Option<String>), Box<dyn std::error::Error>> {
-        let t_vars = Self::with_progress(
+        let t_vars = UtilsService::with_progress(
             || Self::fetch_questions(path),
             "Fetching questions",
             "Fetched questions",
@@ -166,36 +165,10 @@ impl DockerCommands {
         }
 
         let file_path = format!(
-            "{BASE_URL}{path}/{}",
+            "{WORKFLOWS_BASE_URL}{path}/{}",
             t_vars.name.unwrap_or(DOCKER_FILE.to_owned())
         );
 
         Ok((None, Some(file_path)))
-    }
-
-    async fn with_progress<T, R>(
-        fun: impl FnOnce() -> T,
-        msg: &str,
-        success: &str,
-        failed: &str,
-    ) -> Result<R, Box<dyn std::error::Error>>
-    where
-        T: Future<Output = Result<R, Box<dyn Error>>>,
-    {
-        let progress = spinner();
-        progress.start(msg);
-
-        let result = fun().await;
-
-        match result {
-            Ok(x) => {
-                progress.stop(success);
-                Ok(x)
-            }
-            Err(err) => {
-                progress.error(failed);
-                Err(err)
-            }
-        }
     }
 }
