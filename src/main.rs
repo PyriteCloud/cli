@@ -1,7 +1,6 @@
 use clap::Parser;
 use cliclack::set_theme;
-use commands::{auth::AuthCommands, deploy::DeployCommands, Cli, Commands};
-use models::pyrite_json::PyriteJson;
+use commands::{Cli, Commands, auth::AuthCommands, deploy::DeployCommands};
 use utils::PyriteTheme;
 
 pub mod commands;
@@ -21,6 +20,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Commands::Docker { docker_cmd } => docker_cmd.run().await?,
         Commands::Teams { teams_cmd } => teams_cmd.run().await?,
         Commands::Projects { projects_cmd } => projects_cmd.run().await?,
+        Commands::Services { services_cmd } => services_cmd.run().await?,
+        Commands::Environments { environments_cmd } => environments_cmd.run().await?,
         Commands::Deploy { file } => DeployCommands::run(file).await?,
     }
 

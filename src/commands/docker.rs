@@ -157,9 +157,9 @@ impl DockerCommands {
             }
         }
 
-        if t_vars.after.is_some() {
+        if let Some(after) = t_vars.after {
             let handlebars = Handlebars::new();
-            let goto = t_vars.after.unwrap().goto;
+            let goto = after.goto;
             let new_goto = handlebars.render_template(&goto, &answers)?;
             return Ok((Some(After::new(new_goto)), None));
         }

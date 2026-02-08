@@ -2,10 +2,10 @@ use pyrite_client_rs::{
     helpers::request::ReqWithMetadata,
     pyrite::v1::{
         common::v1::Empty,
-        teams::v1::{team_service_client::TeamServiceClient, Team, TeamById, Teams},
+        teams::v1::{Team, TeamById, Teams, team_service_client::TeamServiceClient},
     },
 };
-use tonic::{transport::channel::Channel, Request};
+use tonic::{Request, transport::channel::Channel};
 
 use crate::utils::PYRITE_API_BASE_URL;
 

@@ -2,19 +2,20 @@ use std::collections::HashMap;
 
 use pbjson_types::Value;
 use pyrite_client_rs::pyrite::v1::services::v1::deployments::v1::{
-    DeploymentPortDto, DeploymentRegionDto, DeploymentVolumeDto,
+    DeploymentFileDto, DeploymentPortDto, DeploymentRegionDto, DeploymentVolumeDto,
 };
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct PyriteJson {
+pub(crate) struct PyriteToml {
     pub project_id: String,
-    pub services: Vec<Service>,
+    pub services: Vec<TomlService>,
 }
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct Service {
+pub(crate) struct TomlService {
     pub name: String,
+    pub environment: String,
     pub r#type: String,
     pub image: String,
     pub plan: String,
@@ -24,6 +25,7 @@ pub(crate) struct Service {
     pub regions: Option<Vec<DeploymentRegionDto>>,
     pub ports: Option<Vec<DeploymentPortDto>>,
     pub volumes: Option<Vec<DeploymentVolumeDto>>,
+    pub files: Option<Vec<DeploymentFileDto>>,
     pub env: Option<HashMap<String, Value>>,
     pub with_project_env: Option<bool>,
     pub registry_id: Option<String>,

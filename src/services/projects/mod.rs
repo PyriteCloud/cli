@@ -1,11 +1,11 @@
 use pyrite_client_rs::{
     helpers::request::ReqWithMetadata,
     pyrite::v1::projects::v1::{
-        project_service_client::ProjectServiceClient, Project, ProjectById, Projects,
-        ProjectsByTeamId,
+        Project, ProjectById, Projects, ProjectsByTeamId,
+        project_service_client::ProjectServiceClient,
     },
 };
-use tonic::{transport::channel::Channel, Request};
+use tonic::{Request, transport::channel::Channel};
 
 use crate::utils::PYRITE_API_BASE_URL;
 
@@ -15,8 +15,8 @@ use super::AuthService;
 pub(crate) struct ProjectsService;
 
 impl ProjectsService {
-    pub async fn get_projects_client(
-    ) -> Result<ProjectServiceClient<Channel>, Box<dyn std::error::Error>> {
+    pub async fn get_projects_client()
+    -> Result<ProjectServiceClient<Channel>, Box<dyn std::error::Error>> {
         let client = ProjectServiceClient::connect(PYRITE_API_BASE_URL).await?;
         Ok(client)
     }

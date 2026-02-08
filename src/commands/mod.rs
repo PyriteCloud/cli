@@ -1,12 +1,16 @@
 pub mod auth;
 pub mod deploy;
 pub mod docker;
+pub mod environments;
 pub mod projects;
+pub mod services;
 pub mod teams;
 
 use clap::{Parser, Subcommand};
 use docker::DockerCommands;
+use environments::EnvironmentsCommands;
 use projects::ProjectsCommands;
+use services::ServicesCommands;
 use teams::TeamsCommands;
 
 #[derive(Parser, Debug)]
@@ -32,11 +36,19 @@ pub(crate) enum Commands {
         #[command(subcommand)]
         projects_cmd: ProjectsCommands,
     },
+    Services {
+        #[command(subcommand)]
+        services_cmd: ServicesCommands,
+    },
+    Environments {
+        #[command(subcommand)]
+        environments_cmd: EnvironmentsCommands,
+    },
     Deploy {
         #[arg(
             short,
-            help = "Path to the Pyrite file",
-            default_value =Some("pyrite.json")
+            help = "Path to the pyrite.toml file",
+            default_value = Some("pyrite.toml")
         )]
         file: Option<String>,
     },
