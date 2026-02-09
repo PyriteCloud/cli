@@ -1,4 +1,6 @@
 # syntax=docker/dockerfile:1
+ARG SUPABASE_URL
+ARG SUPABASE_API_KEY
 
 FROM chainguard/rust:latest-dev as build
 USER root
@@ -12,6 +14,12 @@ COPY --chown=nonroot:nonroot . .
 RUN cargo build --locked --release
 
 FROM chainguard/glibc-dynamic:latest-dev
+ARG SUPABASE_URL
+ARG SUPABASE_API_KEY
+
+ENV SUPABASE_URL=$SUPABASE_URL
+ENV SUPABASE_API_KEY=$SUPABASE_API_KEY
+
 USER root
 
 WORKDIR /tmp

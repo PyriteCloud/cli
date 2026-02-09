@@ -1,0 +1,3 @@
+[submodule "client-rs"]
+	path = client-rs
+	url = git@github.com:PyriteCloud/client-rs.git

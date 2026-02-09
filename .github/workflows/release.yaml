@@ -15,6 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CLIENT_RS_PAT }}
+          submodules: true
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -36,3 +39,6 @@ jobs:
           tags: ghcr.io/pyritecloud/pyrite:latest
           platforms: linux/amd64,linux/arm64
           push: true
+          build-args: |
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_API_KEY=${{ secrets.SUPABASE_API_KEY }}

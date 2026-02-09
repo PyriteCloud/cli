@@ -27,17 +27,13 @@ pub(crate) struct AuthService;
 
 impl AuthService {
     pub fn get_auth_client() -> AuthClient {
-        let env = if cfg!(debug_assertions) {
-            "local"
-        } else {
-            "prod"
-        };
-        let dot_env = DotEnv::new(env);
-
-        let project_url = dot_env.get_var("SUPABASE_URL".to_owned()).unwrap();
-        let api_key = dot_env.get_var("SUPABASE_KEY".to_owned()).unwrap();
-
-        AuthClient::new(project_url, api_key, "")
+        if cfg!(debug_assertions) {
+            let dot_env = DotEnv::new("local");
+            let project_url = dot_env.get_var("SUPABASE_URL".to_owned()).unwrap();
+            let api_key = dot_env.get_var("SUPABASE_API_KEY".to_owned()).unwrap();
+            return AuthClient::new(project_url, api_key, "");
+        }
+        AuthClient::new_from_env().unwrap()
     }
 
     pub async fn get_session() -> Result<Session, Box<dyn Error>> {

@@ -18,7 +18,7 @@ supabase-auth = "0.10.14"
 tonic = { version = "0.14.3" }
 rust_dotenv = "0.1.3"
 base64 = "0.22.1"
-pyrite-client-rs = { path = "../client-rs" }
+pyrite-client-rs = { path = "./client-rs" }
 comfy-table = { version = "7.2.2", features = ["custom_styling"] }
 chrono = "0.4.43"
 pbjson-types = "0.9.0"
