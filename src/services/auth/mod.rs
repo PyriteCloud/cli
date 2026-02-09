@@ -42,7 +42,9 @@ impl AuthService {
 
     pub async fn get_session() -> Result<Session, Box<dyn Error>> {
         let auth_client = Self::get_auth_client();
-        let session = Self::read_session().await?.ok_or("No session found")?;
+        let session = Self::read_session()
+            .await?
+            .ok_or("No active session found. Please log in to continue.")?;
 
         // Return the session if it's not expired
         if session.expires_at >= Utc::now().timestamp() as u64 {
@@ -50,15 +52,15 @@ impl AuthService {
         }
 
         // Refresh the session if it's expired
-        let new_session = auth_client
-            .refresh_session(&session.refresh_token)
-            .await
-            .expect("Failed to refresh session");
+        if let Ok(new_session) = auth_client.refresh_session(&session.refresh_token).await {
+            // Write the new session to file
+            Self::write_session(&new_session)?;
 
-        // Write the new session to file
-        Self::write_session(&new_session)?;
+            return Ok(new_session);
+        }
 
-        Ok(new_session)
+        Self::delete_session()?;
+        Err("Session expired. Please log in again to continue.".into())
     }
 
     pub async fn get_metadata() -> Result<MetadataMap, Box<dyn Error>> {
@@ -104,7 +106,7 @@ impl AuthService {
             }
         }
 
-        "Something went wrong".into_response()
+        "Something went wrong. Please try again.".into_response()
     }
 
     pub async fn start_auth_server(code_verifier: String) -> Result<(), Box<dyn Error>> {
