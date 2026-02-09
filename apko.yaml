@@ -19,10 +19,10 @@ accounts:
       gid: 65532
   run-as: nonroot:nonroot
 
-environment: 
+environment:
   PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
   SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
 
 archs:
-- x86_64
-- aarch64
+  - x86_64
+  - aarch64
