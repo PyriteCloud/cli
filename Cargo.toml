@@ -2,6 +2,11 @@
 name = "pyrite"
 version = "0.1.0"
 edition = "2024"
+authors = ["Ayush Chothe <cto@pyrite.cloud>"]
+
+description = "Pyrite Cloud CLI"
+homepage = "https://github.com/PyriteCloud/cli"
+repository = "https://github.com/PyriteCloud/cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -26,3 +31,8 @@ axum = "0.8.8"
 axum-server = "0.8.0"
 oauth2 = "5.0.0"
 toml = "0.9.11"
+
+# The profile that 'dist' will build with
+[profile.dist]
+inherits = "release"
+lto = "thin"
