@@ -4,17 +4,17 @@ use base64::{Engine, prelude::BASE64_STANDARD_NO_PAD};
 use comfy_table::{Table, modifiers, presets};
 use pyrite_client_rs::pyrite::v1::services::v1::{
     UpsertServiceDto,
-    common::v1::Service,
+    common::v1::{Service, ServiceEnvironment},
     deployments::v1::{
-        DeploymentFileList, DeploymentPortList, DeploymentRegionList, DeploymentVolumeList,
-        DockerDeploymentDto,
+        DeploymentFileList, DeploymentHealthCheckList, DeploymentPortList, DeploymentRegionList,
+        DeploymentVolumeList, DockerDeploymentDto,
     },
     upsert_service_dto::DeploymentConfig,
 };
 
 use crate::{
     models::pyrite_toml::{PyriteToml, TomlService},
-    services::ServicesService,
+    services::{ServicesService, UtilsService},
 };
 
 #[derive(Debug, Clone)]
@@ -31,19 +31,39 @@ impl DeployCommands {
         let file_data = std::fs::read_to_string(file_path)?;
         let pyrite_json: PyriteToml = toml::from_str(&file_data)?;
 
-        let service = pyrite_json.services.first().unwrap();
-        let upsert_service_dto =
-            Self::get_upsert_service_dto_from_service(pyrite_json.project_id, service);
-
-        let service = ServicesService::upsert_service(upsert_service_dto).await?;
-
-        let table = Self::get_service_table(service).await?;
-        println!("{table}");
+        let service = pyrite_json.service;
+        Self::deploy_service(&pyrite_json.project_id, &service).await?;
 
         Ok(())
     }
 
-    async fn get_service_table(service: Service) -> Result<Table, Box<dyn std::error::Error>> {
+    async fn deploy_service(
+        project_id: &str,
+        service: &TomlService,
+    ) -> Result<(), Box<dyn std::error::Error>> {
+        let upsert_service_dto =
+            Self::get_upsert_service_dto_from_service(project_id.to_string(), service);
+
+        let res = UtilsService::with_progress(
+            || async { ServicesService::upsert_service(upsert_service_dto).await },
+            &format!("Deploying {}", service.name),
+            &format!("Deployment of {} successful", service.name),
+            &format!("Deployment of {} failed", service.name),
+        )
+        .await?;
+
+        let table =
+            Self::get_service_details_table(res.service.unwrap(), res.service_environment.unwrap())
+                .await?;
+
+        println!("{table}");
+        Ok(())
+    }
+
+    async fn get_service_details_table(
+        service: Service,
+        service_environment: ServiceEnvironment,
+    ) -> Result<Table, Box<dyn std::error::Error>> {
         let mut table = Table::new();
         table
             .load_preset(presets::UTF8_FULL)
@@ -53,6 +73,7 @@ impl DeployCommands {
                 "Team Name",
                 "Project Name",
                 "Service Name",
+                "Environment Name",
             ]);
 
         table.add_row(vec![
@@ -70,6 +91,7 @@ impl DeployCommands {
                 .map(|project| project.name.to_owned())
                 .unwrap_or_default(),
             service.name,
+            service_environment.name,
         ]);
 
         Ok(table)
@@ -104,6 +126,10 @@ impl DeployCommands {
                     .ports
                     .to_owned()
                     .map(|ports| DeploymentPortList { ports }),
+                health_checks_list: service
+                    .health_checks
+                    .to_owned()
+                    .map(|health_checks| DeploymentHealthCheckList { health_checks }),
                 regions_list: service
                     .regions
                     .to_owned()

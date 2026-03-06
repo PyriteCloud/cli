@@ -1,7 +1,7 @@
 use pyrite_client_rs::{
     helpers::request::ReqWithMetadata,
     pyrite::v1::services::v1::{
-        ServiceById, ServicesByTeamIdOrProjectId, UpsertServiceDto,
+        ServiceById, ServicesByTeamIdOrProjectId, UpsertServiceDto, UpsertServiceResponseDto,
         common::v1::{Service, Services},
         services_by_team_id_or_project_id::Id,
         services_service_client::ServicesServiceClient,
@@ -65,7 +65,7 @@ impl ServicesService {
 
     pub async fn upsert_service(
         upsert_service_dto: UpsertServiceDto,
-    ) -> Result<Service, Box<dyn std::error::Error>> {
+    ) -> Result<UpsertServiceResponseDto, Box<dyn std::error::Error>> {
         let mut client = Self::get_services_client().await?;
         let metadata = AuthService::get_metadata().await?;
 
