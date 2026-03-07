@@ -1,4 +1,4 @@
-use std::{collections::HashMap, env, error::Error, fs, path::PathBuf, sync::Arc};
+use std::{collections::HashMap, error::Error, fs, path::PathBuf, sync::Arc};
 
 use axum::{
     Router,
@@ -82,7 +82,7 @@ impl AuthService {
             cookie_key.to_owned(),
             format!(
                 "base64-{}",
-                BASE64_STANDARD_NO_PAD.encode(serde_json::to_string(&session)?)
+                BASE64_URL_SAFE_NO_PAD.encode(serde_json::to_string(&session)?)
             ),
         )]);
         let metadata = MetadataMap::from_headers(TryFrom::try_from(&headers).unwrap());
@@ -165,7 +165,9 @@ impl AuthService {
     }
 
     pub fn get_session_path() -> PathBuf {
-        let home = env::var("HOME").unwrap();
-        PathBuf::from(home).join(".pyrite").join("session.json")
+        dirs::home_dir()
+            .expect("Failed to get home directory")
+            .join(".pyrite")
+            .join("session.json")
     }
 }

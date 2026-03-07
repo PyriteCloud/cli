@@ -31,8 +31,8 @@ impl DeployCommands {
         let file_data = std::fs::read_to_string(file_path)?;
         let pyrite_json: PyriteToml = toml::from_str(&file_data)?;
 
-        let service = pyrite_json.service;
-        Self::deploy_service(&pyrite_json.project_id, &service).await?;
+        let service = pyrite_json.services.first().unwrap();
+        Self::deploy_service(&pyrite_json.project_id, service).await?;
 
         Ok(())
     }

@@ -10,7 +10,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub(crate) struct PyriteToml {
     pub project_id: String,
-    pub service: TomlService,
+    pub services: Vec<TomlService>,
 }
 
 #[derive(Debug, Deserialize)]

@@ -9,7 +9,7 @@ cargo-dist-version = "0.31.0"
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
-installers = ["homebrew"]
+installers = ["homebrew", "powershell"]
 # A GitHub repo to push Homebrew formulas to
 tap = "PyriteCloud/homebrew-tap"
 # Target platforms to build apps for (Rust target-triple syntax)
