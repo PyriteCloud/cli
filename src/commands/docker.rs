@@ -43,7 +43,7 @@ impl DockerCommands {
                 if let Ok(choice) = ans {
                     Self::process_choice(choice.to_owned()).await?;
                 } else {
-                    return Err(ERR_MSG)?;
+                    return Err(ERR_MSG.into());
                 }
             }
         }
@@ -125,7 +125,7 @@ impl DockerCommands {
                     } else if let Some(choice) = question.default {
                         answers.insert(question.var_name, choice.into());
                     } else {
-                        return Err(ERR_MSG)?;
+                        return Err(ERR_MSG.into());
                     }
                 }
                 QuestionType::Select => {
@@ -143,7 +143,7 @@ impl DockerCommands {
                     if let Ok(choice) = ans {
                         answers.insert(question.var_name, choice.into());
                     } else {
-                        return Err(ERR_MSG)?;
+                        return Err(ERR_MSG.into());
                     }
                 }
                 QuestionType::Confirm => {
@@ -151,7 +151,7 @@ impl DockerCommands {
                     if let Ok(choice) = ans {
                         answers.insert(question.var_name, choice.into());
                     } else {
-                        return Err(ERR_MSG)?;
+                        return Err(ERR_MSG.into());
                     }
                 }
             }
