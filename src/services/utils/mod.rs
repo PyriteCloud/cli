@@ -32,6 +32,31 @@ impl UtilsService {
         }
     }
 
+    pub async fn with_transient_progress<T, R>(
+        fun: impl FnOnce() -> T,
+        msg: &str,
+        failed: &str,
+    ) -> Result<R, Box<dyn std::error::Error>>
+    where
+        T: Future<Output = Result<R, Box<dyn Error>>>,
+    {
+        let progress = spinner();
+        progress.start(msg);
+
+        let result = fun().await;
+
+        match result {
+            Ok(x) => {
+                progress.clear();
+                Ok(x)
+            }
+            Err(err) => {
+                progress.error(failed);
+                Err(err)
+            }
+        }
+    }
+
     pub fn get_service_status_label(service_status: i32) -> String {
         match service_status {
             // Generic

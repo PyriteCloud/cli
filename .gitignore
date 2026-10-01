@@ -1,5 +1,8 @@
 /target
 /tmp
 
+.agents
+skills-lock.json
+
 *.env*
 !.env.local

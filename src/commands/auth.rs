@@ -16,7 +16,7 @@ impl AuthCommands {
             "Login successful",
             "Failed to login",
         )
-        .await?; // Session
+        .await?;
 
         cliclack::outro(format!("Logged in as {}", session.user.email))?;
 
@@ -34,11 +34,7 @@ impl AuthCommands {
 
         // If no valid session, proceed with OAuth
         {
-            let auth_client = AuthService::get_auth_client();
-
-            // let session = auth_client
-            // .login_with_email("user@pyrite.cloud", "Pyrite@Cloud")
-            // .await?;
+            let auth_client = AuthService::get_auth_client()?;
 
             let (pkce_challenge, pkce_verifier) = PkceCodeChallenge::new_random_sha256();
 
@@ -47,7 +43,7 @@ impl AuthCommands {
                     ("skip_browser_redirect".to_owned(), "true".to_owned()),
                     (
                         "redirect_to".to_owned(),
-                        "http://127.0.0.1:3456/auth/callback".to_owned(),
+                        AuthService::CALLBACK_URL.to_owned(),
                     ),
                     ("response_type".to_owned(), "code".to_owned()),
                     (
@@ -59,16 +55,11 @@ impl AuthCommands {
                 ..Default::default()
             };
 
-            let oauth_res = auth_client
-                // .login_with_email("user@pyrite.cloud", "Pyrite.Cloud")
-                .login_with_oauth(Provider::Github, Some(options))?;
+            let oauth_res = auth_client.login_with_oauth(Provider::Github, Some(options))?;
 
             println!("{}", oauth_res.url);
 
             AuthService::start_auth_server(pkce_verifier.into_secret()).await?;
-
-            // let session = auth_client.exchange_token_for_session("").await?;
-            // AuthService::write_session(&session)?;
 
             let session = AuthService::get_session().await?;
 
@@ -86,7 +77,7 @@ impl AuthCommands {
         .await?;
 
         if session.is_some() {
-            AuthService::delete_session()?;
+            AuthService::delete_session().await?;
             cliclack::outro("Logged out")?;
         } else {
             cliclack::outro("No session found")?;

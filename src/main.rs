@@ -17,6 +17,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     match args.cmd {
         Commands::Login => AuthCommands::login().await?,
         Commands::Logout => AuthCommands::logout().await?,
+        Commands::Billing { billing_cmd } => billing_cmd.run().await?,
+        Commands::Notifications { notifications_cmd } => notifications_cmd.run().await?,
+        Commands::Misc { misc_cmd } => misc_cmd.run().await?,
         Commands::Docker { docker_cmd } => docker_cmd.run().await?,
         Commands::Teams { teams_cmd } => teams_cmd.run().await?,
         Commands::Projects { projects_cmd } => projects_cmd.run().await?,
